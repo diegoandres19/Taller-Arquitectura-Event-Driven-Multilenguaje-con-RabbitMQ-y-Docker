@@ -1,0 +1,29 @@
+x-rabbit: &rabbit
+  RABBITMQ_HOST: "192.168.1.12"
+  RABBITMQ_USER: "admin"
+  RABBITMQ_PASS: "admin"
+
+services:
+  pedidos:
+    build: ../servicios/productores/pedidos-python
+    container_name: pedidos
+    restart: unless-stopped
+    environment: *rabbit
+
+  pagos:
+    build: ../servicios/productores/pagos-node
+    container_name: pagos
+    restart: unless-stopped
+    environment: *rabbit
+
+  facturacion:
+    build: ../servicios/consumidores/facturacion-node
+    container_name: facturacion
+    restart: unless-stopped
+    environment: *rabbit
+
+  existencias:
+    build: ../servicios/consumidores/existencias-go
+    container_name: existencias
+    restart: unless-stopped
+    environment: *rabbit

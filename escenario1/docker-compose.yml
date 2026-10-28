@@ -1,0 +1,79 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  pedidos:
+    build: ../servicios/productores/pedidos-python
+    container_name: pedidos
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  pagos:
+    build: ../servicios/productores/pagos-node
+    container_name: pagos
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  inventario:
+    build: ../servicios/productores/inventario-go
+    container_name: inventario
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  usuarios:
+    build: ../servicios/productores/usuarios-java
+    container_name: usuarios
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  facturacion:
+    build: ../servicios/consumidores/facturacion-node
+    container_name: facturacion
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notificaciones:
+    build: ../servicios/consumidores/notificaciones-python
+    container_name: notificaciones
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  existencias:
+    build: ../servicios/consumidores/existencias-go
+    container_name: existencias
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  auditoria:
+    build: ../servicios/consumidores/auditoria-java
+    container_name: auditoria
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy

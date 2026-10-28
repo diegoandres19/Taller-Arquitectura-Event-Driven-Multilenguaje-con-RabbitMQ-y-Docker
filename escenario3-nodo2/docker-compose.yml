@@ -1,0 +1,29 @@
+x-rabbit: &rabbit
+  RABBITMQ_HOST: "192.168.1.12"
+  RABBITMQ_USER: "admin"
+  RABBITMQ_PASS: "admin"
+
+services:
+  inventario:
+    build: ../servicios/productores/inventario-go
+    container_name: inventario
+    restart: unless-stopped
+    environment: *rabbit
+
+  usuarios:
+    build: ../servicios/productores/usuarios-java
+    container_name: usuarios
+    restart: unless-stopped
+    environment: *rabbit
+
+  notificaciones:
+    build: ../servicios/consumidores/notificaciones-python
+    container_name: notificaciones
+    restart: unless-stopped
+    environment: *rabbit
+
+  auditoria:
+    build: ../servicios/consumidores/auditoria-java
+    container_name: auditoria
+    restart: unless-stopped
+    environment: *rabbit
